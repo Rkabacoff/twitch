@@ -3,6 +3,7 @@
 
 # install.packages("ggplot2")
 
+
 library(ggplot2)
 
 # import data
@@ -151,8 +152,41 @@ ggplot(data=mtcars, aes(x=wt, y=mpg)) + geom_point() +
   annotate("text", x=5, y=21, label="Average Mileage", color="red")  
 
 
+# interactive graph
+# install.packages("plotly")
+
+library(plotly)
+data(mtcars)
+mtcars$carname <- row.names(mtcars)
+mtcars$cyl <- factor(mtcars$cyl)
+p <- ggplot(mtcars, aes(x=wt, y=mpg, text=carname,
+                        color=cyl)) +
+  geom_point()
+ggplotly(p, tooltip=c("x", "y", "text"))
 
 
+# combining graphs
+# install.packages("patchwork")
+# install.packages("scales")
 
+library(patchwork)
+theme_set(theme_minimal())
 
+p1 <- ggplot(Salaries, aes(x=log(salary))) +
+  geom_histogram(fill="steelblue", color="white")
 
+p2 <- ggplot(Salaries, aes(x=yrs.service)) +
+  geom_histogram(fill="firebrick", color="white")
+
+p3 <- ggplot(Salaries, aes(x=rank, fill=rank)) + geom_bar() +
+  coord_flip() + theme(legend.position="none") 
+
+p4 <- ggplot(Salaries, aes(x=yrs.service, y=salary)) +
+  geom_point(aes(color=rank)) +
+  geom_smooth(method="lm", formula=y~poly(x, 2)) +
+  scale_y_continuous(labels=scales::dollar_format()) +
+  theme(legend.position="bottom")
+
+(p1 + p2 + p3)/ p4 + plot_layout(heights=c(1,3)) +
+  plot_annotation(title="College Salaries",
+                  subtitle="A demonstration of patchwork")
